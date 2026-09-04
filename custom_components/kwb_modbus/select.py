@@ -183,7 +183,7 @@ class KWBSelectEntity(CoordinatorEntity[KWBDataUpdateCoordinator], SelectEntity)
         """Return device information.
 
         Indexed entities (HC, BUF, SOL, ...) are attached to a per-instance
-        sub-device linked to the main KWB boiler device via via_device.
+        sub-device linked to the main KWB boiler device via via_device_id.
         Non-indexed entities live directly on the main device.
         """
         if self._register.index:
@@ -193,7 +193,7 @@ class KWBSelectEntity(CoordinatorEntity[KWBDataUpdateCoordinator], SelectEntity)
             return DeviceInfo(
                 identifiers={(DOMAIN, f"{self._entry.entry_id}_{self._register.index}")},
                 name=friendly_name,
-                via_device=(DOMAIN, self._entry.entry_id),
+                via_device_id=self.coordinator.parent_device_id,
                 manufacturer="KWB",
             )
         model = HEATING_DEVICES.get(

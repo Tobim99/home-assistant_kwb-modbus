@@ -11,8 +11,15 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_SCAN_INTERVAL, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers import device_registry as dr
 
-from .const import CONF_DISCOVERED_SENSORS, DEFAULT_SCAN_INTERVAL
+from .const import (
+    CONF_DISCOVERED_SENSORS,
+    CONF_HEATING_DEVICE,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    HEATING_DEVICES,
+)
 from .coordinator import KWBDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -59,6 +66,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: KwbModbusConfigEntry) ->
         await coordinator.async_run_discovery()
 
     await coordinator.async_config_entry_first_refresh()
+
+    model = HEATING_DEVICES.get(entry.data.get(CONF_HEATING_DEVICE, ""), "KWB Heating")
+    data = coordinator.data or {}
+    major, minor, patch = data.get(8192), data.get(8193), data.get(8194)
+    sw_version = (
+        f"{major}.{minor}.{patch}" if None not in (major, minor, patch) else None
+    )
+    device = dr.async_get(hass).async_get_or_create(
+        config_entry_id=entry.entry_id,
+        identifiers={(DOMAIN, entry.entry_id)},
+        name=model,
+        manufacturer="KWB",
+        model=model,
+        sw_version=sw_version,
+    )
+    coordinator.parent_device_id = device.id
     entry.runtime_data = coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, _PLATFORMS)

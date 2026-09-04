@@ -43,6 +43,7 @@ class KWBDataUpdateCoordinator(DataUpdateCoordinator[dict[int, Any]]):
         """Initialize the coordinator."""
         self.client = client
         self.entry = entry
+        self.parent_device_id: str
         self.slave_id = entry.data.get(CONF_SLAVE_ID, DEFAULT_SLAVE_ID)
         self._heating_device: str = entry.data[CONF_HEATING_DEVICE]
         self._addon_modules: list[str] = entry.data.get(CONF_ADDON_MODULES, [])

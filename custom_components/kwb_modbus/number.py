@@ -183,7 +183,7 @@ class KWBNumberEntity(CoordinatorEntity[KWBDataUpdateCoordinator], NumberEntity)
             return DeviceInfo(
                 identifiers={(DOMAIN, f"{self._entry.entry_id}_{self._register.index}")},
                 name=friendly_name,
-                via_device=(DOMAIN, self._entry.entry_id),
+                via_device_id=self.coordinator.parent_device_id,
                 manufacturer="KWB",
             )
         model = HEATING_DEVICES.get(
